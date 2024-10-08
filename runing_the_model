@@ -1,0 +1,32 @@
+if __name__ == "__main__":
+    model = ChessNet()
+    optimizer = optim.Adam(model.parameters())
+    
+    num_games = 10
+    minimax_depth = 5
+    
+    model_path = "chess_model_vs_minimax.pth"
+    
+    try:
+        print("Loading existing model from", model_path)
+        model.load_state_dict(torch.load(model_path))
+        print("Model loaded successfully.")
+    except FileNotFoundError:
+        print("No existing model found. Creating a new model.")
+    except RuntimeError as e:
+        print(f"Error loading model: {e}")
+        print("Creating a new model.")
+        model = ChessNet()  # Reinitialize the model
+        optimizer = optim.Adam(model.parameters())
+    
+    # Play games and train the model
+    final_results, last_win_pgn, last_loss_pgn = play_and_train(model, optimizer, num_games, minimax_depth)
+    
+    print("Final results:")
+    print(f"Model wins: {final_results.count(1)}")
+    print(f"Model losses: {final_results.count(-1)}")
+    print(f"Draws: {final_results.count(0)}")
+    
+    # Save the model
+    torch.save(model.state_dict(), model_path)
+    print(f"Model saved to {model_path}")
